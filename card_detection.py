@@ -18,15 +18,23 @@ def preprocess_image(image_path):
 
 def detect_card_contours(gray_image):
     """Detects contours that resemble playing cards."""
-    edges = cv2.Canny(gray_image, 5, 100)  # Adjust thresholds as needed
+    edges = cv2.Canny(gray_image, 2, 50)  # Adjust thresholds as needed
+    # plt.imshow(cv2.cvtColor(edges, cv2.COLOR_BGR2RGB))
+    # plt.title("Edges (Outlined)")
+    # plt.show()
     kernel = np.ones((2, 2), np.uint8)
-    dilated_edges = cv2.dilate(edges, kernel, iterations=1)
+    dilated_edges = cv2.dilate(edges, kernel, iterations=2)
+    # plt.imshow(cv2.cvtColor(dilated_edges, cv2.COLOR_BGR2RGB))
+    # plt.title("Edges")
+    # plt.show()
     contours, _ = cv2.findContours(dilated_edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     card_contours = []
     for contour in contours:
         area = cv2.contourArea(contour)
-        if 500 < area < 50000:  # Adjust area thresholds as needed
+        # print(contour)
+        # print(area)
+        if 1000 < area < 50000:  # Adjust area thresholds as needed
             perimeter = cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
             if len(approx) == 4:
@@ -98,7 +106,7 @@ def calculate_hash(image):
     hash = imagehash.phash(pil_image)
     return hash
 
-def identify_card(card_hash, card_database, threshold=10):
+def identify_card(card_hash, card_database, threshold=20):
     """Identifies the card based on its hash and a database of known hashes."""
     closest_match = None
     min_distance = threshold
